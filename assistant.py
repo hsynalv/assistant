@@ -5,7 +5,6 @@ import json
 from google.cloud import speech
 import os
 from google.cloud import texttospeech
-from elevenlabs.client import ElevenLabs
 import pygame
 import requests
 
@@ -16,9 +15,7 @@ genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-pro')
 
 genai.configure(api_key=GOOGLE_API_KEY)
-client = ElevenLabs(
-    api_key="dfa5c60a3567dc78822ddd4df1bdf767",
-)
+
 
 history_filePath = "DataSet.json"
 reminder_filePath = "reminder.json"
