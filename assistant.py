@@ -1,20 +1,14 @@
 from io import BytesIO
 
-import google.generativeai as genai
+import openai
 import json
-from google.cloud import speech
 import os
 from google.cloud import texttospeech
 import pygame
 import requests
 
 
-GOOGLE_API_KEY = "AIzaSyAPxjtYAXNe9-6dy5euO5rOIXrgos8ADO4"
-genai.configure(api_key=GOOGLE_API_KEY)
 
-model = genai.GenerativeModel('gemini-pro')
-
-genai.configure(api_key=GOOGLE_API_KEY)
 
 
 history_filePath = "DataSet.json"
@@ -175,12 +169,22 @@ def run_assistant(ci, audio):
     else:
         prompt = create_prompt(ci, Soru, history, None, "")
 
-    response = model.generate_content(prompt, safety_settings=safety_settings_default)
+    response =  openai.chat.completions.create(
+            model='gpt-4o-mini',
+            messages=[
+                {"role": "system", "content": f"{Custom_Instruction}"},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,  # Allows for creative enhancements
+            frequency_penalty=0.0,  # Doesn't penalize word repetition
+            presence_penalty=0.0  # Neutral towards new topics
+    )
 
-    print(response.text)
+    result = response.choices[0].message.content
+    print(f"AI çıktısı: {result}")
 
 
-    write_json(Soru=Soru, answer=response.text, filePath=history_filePath)
-    tts = synthesize_speech_from_google(clear_newLine(response.text))
+    write_json(Soru=Soru, answer=result, filePath=history_filePath)
+    tts = synthesize_speech_from_google(clear_newLine(result))
     return tts
 
