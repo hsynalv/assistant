@@ -1,0 +1,90 @@
+[
+    {
+        "Soru": "Merhaba nasılsın",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seni dinliyorum. Benim için her şey yolunda, sen nasılsın? Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "gayet iyiyim teşekkür ederim",
+        "answer": "Harika, Hüseyin! İyi hissetmene sevindim. Bugün için özel bir planın var mı, yoksa günü akışına mı bırakacaksın?"
+    },
+    {
+        "Soru": "ne haber nasılsın",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle konuşmak için sabırsızlanıyorum. Benim için her şey yolunda. Sen nasılsın? Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "Asistan Benim adım ne",
+        "answer": "Merhaba Hüseyin! Senin adın Hüseyin. Seninle konuşmak benim için her zaman bir zevk. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "Benim adım ne",
+        "answer": "Merhaba Hüseyin! Senin adın Hüseyin. Sana nasıl yardımcı olabilirim?"
+    },
+    {
+        "Soru": "Merhaba Az önce Biz ne konuştuk",
+        "answer": "Merhaba Hüseyin! Şu an için geçmiş konuşmalarımızı göremiyorum, ama yeni bir başlangıç yapabiliriz. Nasılsın? Bugün senin için önemli bir şey var mı?"
+    },
+    {
+        "Soru": "ben sana en son ne sordum",
+        "answer": "Merhaba Hüseyin! Geçmiş konuşmalarımızı göremiyorum, ama sana her zaman yardımcı olmaya hazırım. Son zamanlarda neler düşündüğünü veya merak ettiğin bir şey var mı?"
+    },
+    {
+        "Soru": "en son ne sordum sana",
+        "answer": "Merhaba Hüseyin! Geçmiş konuşmalarımızı göremediğim için en son ne sorduğunu hatırlayamıyorum. Ama seninle sohbet etmek için buradayım! Ne hakkında konuşmak istersin?"
+    },
+    {
+        "Soru": "ben sana en son ne sordum",
+        "answer": "Merhaba Hüseyin! Geçmiş konuşmalarımızı göremediğim için en son ne sorduğunu hatırlayamıyorum. Ama seninle sohbet etmek için buradayım! Şu an aklında ne var? Ne hakkında konuşmak istersin?"
+    },
+    {
+        "Soru": "ne haber",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle sohbet etmek için sabırsızlanıyorum. Her şey yolunda, umarım sen de iyisindir. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "ne haber",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle sohbet etmek için sabırsızlanıyorum. Her şey yolunda, umarım sen de iyisindir. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "ne haber nasılsın",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle sohbet etmek için heyecanlıyım. Her şey yolunda, umarım sen de iyisindir. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "ne haber nasılsın",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle sohbet etmek için heyecanlıyım. Her şey yolunda, umarım sen de iyisindir. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "ne haber nasılsın",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle sohbet etmek için heyecanlıyım. Her şey yolunda, umarım sen de iyisindir. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "İyi bende nasıl olsun",
+        "answer": "Merhaba Hüseyin! İyi olduğunu duymak harika! Hayatında seni mutlu eden şeyler var mı? Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "Merhaba chat nasılsın?\n",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle sohbet etmek için heyecanlıyım. Her şey yolunda, umarım sen de iyisindir. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "Benim bugün, benim bugün çok canım sıkılıyor ya.\n",
+        "answer": "\"Üzgünüm canının sıkıldığını duyduğuma. Belki dışarıda küçük bir gezinti yapabilirsin ya da müzik dinlemek iyi bir fikir olabilir. Senin için başka bir şey yapabileceğim bir konu var mı?\""
+    },
+    {
+        "Soru": "merhaba nasılsın\n",
+        "answer": "Merhaba Hüseyin! Ben buradayım ve seninle sohbet etmek için heyecanlıyım. Her şey yolunda, umarım sen de iyisindir. Bugün neler yapmayı planlıyorsun?"
+    },
+    {
+        "Soru": "İzlediğiniz için teşekkür ederim.\n",
+        "answer": "\"Rica ederim! Benim için burada olmak her zaman bir zevk. Başka bir konuda yardımcı olmamı ister misin?\""
+    },
+    {
+        "Soru": "Altyazı M.K.\n",
+        "answer": "\"Merhaba Hüseyin! Altyazı M.K. hakkında konuşmak ister misin? Belki onunla ilgili bir şeyler paylaşabilirim. Yoksa başka bir konuda mı yardımcı olayım?\""
+    },
+    {
+        "Soru": "Altyazı M.K.\n",
+        "answer": "\"Merhaba Hüseyin! Altyazı M.K. hakkında konuşmak istersen buradayım. Bu konuda neler paylaşmak istersin? Yoksa otomobilin özellikleriyle ilgili bir şeyler mi sormak istersin?\""
+    },
+    {
+        "Soru": "Biz az önce ne konuştuk?\n",
+        "answer": "\"Biz az önce senin canının sıkıldığından bahsetmiştik. Belki dışarıda küçük bir gezinti yapabilir ya da müzik dinleyebilirsin demiştim. Başka bir konuda yardımcı olmamı ister misin?\""
+    }
+]
