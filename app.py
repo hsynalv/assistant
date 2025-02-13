@@ -9,9 +9,11 @@ from google.cloud import texttospeech
 import pygame
 import requests
 from flask import Flask, render_template, request, jsonify, send_file
+from groq import Groq
  
 
 app = Flask(__name__)
+
 
 clients = []
 
@@ -72,18 +74,22 @@ def recognize_speech(audio_content, sample_rate):
     """
     Ses dosyasını metne dönüştürür.
     """
+    print("Ses dosyasını metne dönüştürüyor...")
     try:
         # Geçici dosya oluştur
         with io.BytesIO(audio_content) as audio_file:
             audio_file.name = "temp.wav"
             
-            transcription = openai.audio.transcriptions.create(
-                file=audio_file,
-                model="whisper-1",
-                language="tr",
-                response_format="text"
+            transcription = client_groq.audio.transcriptions.create(
+                file=(audio_file.name, audio_file.read()), # Required audio file
+                model="whisper-large-v3-turbo", # Required model to use for transcription
+                prompt="Specify context or spelling",  # Optional
+                response_format="json",  # Optional
+                language="tr",  # Optional
+                temperature=0.0  # Optional
             )
-            return transcription
+            print(transcription.text)
+            return transcription.text
     except Exception as e:
         print(f"STT Hatası: {str(e)}")
         return None
