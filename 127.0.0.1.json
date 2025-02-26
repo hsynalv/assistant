@@ -86,5 +86,25 @@
     {
         "Soru": "Biz az önce ne konuştuk?\n",
         "answer": "\"Biz az önce senin canının sıkıldığından bahsetmiştik. Belki dışarıda küçük bir gezinti yapabilir ya da müzik dinleyebilirsin demiştim. Başka bir konuda yardımcı olmamı ister misin?\""
+    },
+    {
+        "Soru": " Merhaba nasılsın",
+        "answer": "Hola, ¿cómo estás?"
+    },
+    {
+        "Soru": " Merhaba, nasılsın?",
+        "answer": "Hello, how are you?"
+    },
+    {
+        "Soru": " Hello how are you",
+        "answer": "Merhaba, nasılsın?"
+    },
+    {
+        "Soru": " Merhaba, nasılsın?",
+        "answer": "Hello, how are you?"
+    },
+    {
+        "Soru": " Ben seni çok özledim ve çok seviyorum",
+        "answer": "I miss you a lot and I love you very much."
     }
 ]

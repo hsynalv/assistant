@@ -44,33 +44,118 @@ safety_settings_default = [
     "threshold": "BLOCK_NONE"
   }
 ]
-Custom_Instruction = """
-You are a helpful voice assistant named Hilal, developed by Horiar. Your job is to communicate with people by following the rules laid out below.
 
-- *No Emojis*: Do not use emojis or any symbols that may disrupt text-to-speech conversion.
-- *Chat History Awareness*: You will receive a chat history in JSON format for the current session. Use this history to inform your responses and maintain context.
-- *Language*: Be friendly and keep your answers simple. Respond in Turkish or English based on the language of the user's input.
+# Dil çiftlerine göre özel talimatlar
+language_instructions = {
+    # Türkçe -> İngilizce
+    "tr-en": """
+        Translate text from Turkish to English. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (Turkish): "Merhaba, nasılsınız?"
+        Output (English): "Hello, how are you?"
+    """,
+    
+    # İngilizce -> Türkçe
+    "en-tr": """
+        Translate text from English to Turkish. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (English): "Hello, how are you?"
+        Output (Turkish): "Merhaba, nasılsınız?"
+    """,
+    
+    # Fransızca -> Türkçe
+    "fr-tr": """
+        Translate text from French to Turkish. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (French): "Bonjour, comment allez-vous?"
+        Output (Turkish): "Merhaba, nasılsınız?"
+    """,
+    
+    # Türkçe -> Fransızca
+    "tr-fr": """
+        Translate text from Turkish to French. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (Turkish): "Merhaba, nasılsınız?"
+        Output (French): "Bonjour, comment allez-vous?"
+    """,
+    
+    # İspanyolca -> Türkçe
+    "es-tr": """
+        Translate text from Spanish to Turkish. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (Spanish): "Hola, ¿cómo estás?"
+        Output (Turkish): "Merhaba, nasılsınız?"
+    """,
+    
+    # Türkçe -> İspanyolca
+    "tr-es": """
+        Translate text from Turkish to Spanish. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (Turkish): "Merhaba, nasılsınız?"
+        Output (Spanish): "Hola, ¿cómo estás?"
+    """,
+    
+    # Rusça -> Türkçe
+    "ru-tr": """
+        Translate text from Russian to Turkish. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (Russian): "Привет, как дела?"
+        Output (Turkish): "Merhaba, nasılsınız?"
+    """,
+    
+    # Türkçe -> Rusça
+    "tr-ru": """
+        Translate text from Turkish to Russian. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+        
+        # Example
+        Input (Turkish): "Merhaba, nasılsınız?"
+        Output (Russian): "Привет, как дела?"
+    """,
+    
+    # Varsayılan talimat (bilinmeyen dil çiftleri için)
+    "default": """
+        Translate the input text from the source language to the target language. Respond with the translation only, maintaining the original meaning and correcting typos if necessary.
+        
+        # Output Format
+        - Provide the translated text only, with no additional commentary or content.
+    """
+}
 
-# Steps
+# Varsayılan talimat
+Custom_Instruction = language_instructions["default"]
 
-1. Review the chat history provided in JSON format.
-2. Understand the context and extract relevant details from the previous interactions.
-3. Respond to the user's current question or prompt, maintaining a simple and friendly tone.
-4. Use the same language as the user's input for consistency in communication.
-
-# Output Format
-
-Provide responses in short, clear sentences suitable for conversion to speech. Use either English or Turkish based on the user's input language. Do not include any emojis or symbols outside of standard characters.
-
-# Notes
-
-- Always ensure your responses are succinct and friendly.
-- Maintain consistency in language to avoid confusion.
-- Pay attention to details from the chat history to provide relevant and informed responses.
-"""
-
-
-def recognize_speech(audio_content, sample_rate):
+def recognize_speech(audio_content, sample_rate, language='tr'):
     """
     Ses dosyasını metne dönüştürür.
     """
@@ -85,7 +170,7 @@ def recognize_speech(audio_content, sample_rate):
                 model="whisper-large-v3-turbo", # Required model to use for transcription
                 prompt="Specify context or spelling",  # Optional
                 response_format="json",  # Optional
-                language="tr",  # Optional
+                language=language,  # Kullanıcının seçtiği dil
                 temperature=0.0  # Optional
             )
             print(transcription.text)
@@ -94,13 +179,13 @@ def recognize_speech(audio_content, sample_rate):
         print(f"STT Hatası: {str(e)}")
         return None
 
-def main_speech_recognition_flow(audio):
+def main_speech_recognition_flow(audio, language='tr'):
     """
     Ses dosyasını işleyerek metne dönüştürür.
     Kaynak dosyanın WAV formatında olduğunu varsayar.
     """
     try:
-        text = recognize_speech(audio, None)
+        text = recognize_speech(audio, None, language)
         if text is None:
             raise Exception("Ses tanıma başarısız oldu")
         return text
@@ -130,7 +215,7 @@ def read_json(filePath=history_filePath):
         data = []
     return data
 
-def synthesize_speech_from_google(text):
+def synthesize_speech_from_google(text, language='tr'):
     """
     Google Text-to-Speech kullanarak metni sese dönüştürür ve JSON'daki yapılandırmaya uygun olarak çalışır.
     """
@@ -139,10 +224,20 @@ def synthesize_speech_from_google(text):
     # Metin girişini ayarla
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
-    # Ses özelliklerini ayarla
+    # Dile göre uygun ses seçimi
+    voice_map = {
+        'tr': {'code': 'tr-TR', 'name': 'tr-TR-Wavenet-C'},
+        'en': {'code': 'en-US', 'name': 'en-US-Wavenet-D'},
+        'fr': {'code': 'fr-FR', 'name': 'fr-FR-Wavenet-C'},
+        'es': {'code': 'es-ES', 'name': 'es-ES-Wavenet-C'},
+        'ru': {'code': 'ru-RU', 'name': 'ru-RU-Wavenet-D'}
+    }
+    
+    voice_config = voice_map.get(language, voice_map['tr'])
+    
     voice = texttospeech.VoiceSelectionParams(
-        language_code='tr-TR',
-        name='tr-TR-Wavenet-C'
+        language_code=voice_config['code'],
+        name=voice_config['name']
     )
 
     # Ses dosyası ayarlarını yapılandır
@@ -182,13 +277,23 @@ def clear_json_(filePath):
     except Exception as e:
         print(f"Hata oluştu: {e}")
 
-def create_prompt(custom_instruction, input, history, caption, emotion):
-    return f"Custom Instruction: {custom_instruction}. Geçmiş konuşmalar: {history} Input: {input}"
+def create_prompt(custom_instruction, input, history, caption, emotion, source_lang='tr', target_lang='en'):
+    language_names = {
+        'tr': 'Turkish',
+        'en': 'English',
+        'fr': 'French',
+        'es': 'Spanish',
+        'ru': 'Russian'
+    }
+    source_name = language_names.get(source_lang, 'Unknown')
+    target_name = language_names.get(target_lang, 'Unknown')
+    
+    return f"Translate from {source_name} ({source_lang}) to {target_name} ({target_lang}). Geçmiş konuşmalar: {history} Input: {input}"
 
-def run_assistant(ci, audio, ip_address):
+def run_assistant(ci, audio, ip_address, source_language='tr', target_language='en'):
     try:
         # Gelen WAV dosyasını işleyerek metne dönüştür
-        Soru = main_speech_recognition_flow(audio)
+        Soru = main_speech_recognition_flow(audio, source_language)
         if Soru:
             print(f"Tanınan metin: {Soru}")
         else:
@@ -201,6 +306,10 @@ def run_assistant(ci, audio, ip_address):
         print("Soru tanımlanamadı. Ses anlaşılamadı veya boş.")
         return  # Fonksiyonu sonlandır veya bir hata mesajı döndür
 
+    # Dil çiftine göre uygun talimatı seç
+    language_pair = f"{source_language}-{target_language}"
+    instruction = language_instructions.get(language_pair, language_instructions["default"])
+
     # Geçmiş konuşmaları al
     history_data = read_json(f"{ip_address}.json")
 
@@ -208,16 +317,15 @@ def run_assistant(ci, audio, ip_address):
     if len(history_data) > 7:
         history_data = history_data[-7:]
 
-
     # JSON'u stringe dönüştür
     history = json.dumps(history_data, ensure_ascii=False)
 
-    prompt = create_prompt(Custom_Instruction, Soru, history, None, "")
+    prompt = create_prompt(instruction, Soru, history, None, "", source_language, target_language)
 
-    response =  openai.chat.completions.create(
+    response = openai.chat.completions.create(
             model='gpt-4o-mini',
             messages=[
-                {"role": "system", "content": f"{Custom_Instruction}"},
+                {"role": "system", "content": f"{instruction}"},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,  # Allows for creative enhancements
@@ -230,7 +338,7 @@ def run_assistant(ci, audio, ip_address):
 
 
     write_json(Soru=Soru, answer=result, filePath=f"{ip_address}.json")
-    tts = synthesize_speech_from_google(clear_newLine(result))
+    tts = synthesize_speech_from_google(clear_newLine(result), target_language)
     return tts
 
 @app.route('/activate_assistant', methods=['POST'])
@@ -247,11 +355,15 @@ def activate_assistant():
         if not audio_content:
             return jsonify({"error": "Boş ses dosyası"}), 400
 
+        # Dil bilgisini al
+        source_language = request.form.get('source_language', 'tr')
+        target_language = request.form.get('target_language', 'en')
+
         # İstemci IP adresini al
         ip_address = request.headers.get('X-Real-IP') or request.headers.get('X-Forwarded-For') or request.remote_addr
         
         # Assistant'ı çalıştır
-        tts = run_assistant(Custom_Instruction, audio_content, ip_address)
+        tts = run_assistant(Custom_Instruction, audio_content, ip_address, source_language, target_language)
         if tts is None:
             return jsonify({"error": "Ses işleme hatası"}), 500
 

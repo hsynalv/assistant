@@ -93,6 +93,8 @@ function activateFelix() {
     isRecording = true;
     const ci = customInstruction; // Geçerli custom_instruction
     const currentSafetySettings = JSON.parse(localStorage.getItem('safetySettings')) || defaultSafetySettings;
+    const sourceLanguage = getCookie('source_language') || 'tr'; // Kaynak dil bilgisini al
+    const targetLanguage = getCookie('target_language') || 'en'; // Hedef dil bilgisini al
 
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
@@ -156,6 +158,8 @@ function activateFelix() {
                     formData.append('audio', wavBlob, 'input.wav');
                     formData.append('custom_instruction', ci);
                     formData.append('safety_settings', JSON.stringify(currentSafetySettings));
+                    formData.append('source_language', sourceLanguage); // Kaynak dil bilgisini ekle
+                    formData.append('target_language', targetLanguage); // Hedef dil bilgisini ekle
 
                     fetch('/activate_assistant', {
                         method: 'POST',
@@ -411,4 +415,114 @@ function getDocument() {
     Felix'i  kapatmak için 'Programı kapat' diye Felix'e seslenin.
     `;
     showResponse();
+}
+
+// Dil seçimi için gerekli değişkenler ve fonksiyonlar
+document.addEventListener('DOMContentLoaded', function() {
+  const languageButton = document.getElementById('language-button');
+  const languageDropdown = document.getElementById('language-dropdown');
+  const languageOptions = document.querySelectorAll('#language-dropdown .language-option');
+  const targetLanguageButton = document.getElementById('target-language-button');
+  const targetLanguageDropdown = document.getElementById('target-language-dropdown');
+  const targetLanguageOptions = document.querySelectorAll('#target-language-dropdown .language-option');
+  
+  // Sayfa yüklendiğinde cookie'den dil bilgisini al
+  const savedLanguage = getCookie('source_language') || 'tr';
+  const savedTargetLanguage = getCookie('target_language') || 'en';
+  
+  // Kaynak dil butonunu güncelle
+  updateButtonText(languageButton, savedLanguage, '<i class="fas fa-microphone"></i>', "Konuşacağınız dil");
+  
+  // Hedef dil butonunu güncelle
+  updateButtonText(targetLanguageButton, savedTargetLanguage, '<i class="fas fa-volume-up"></i>', "Cevap alacağınız dil");
+  
+  // Dil seçimi butonuna tıklandığında dropdown'ı aç/kapat
+  languageButton.addEventListener('click', function() {
+    languageDropdown.classList.toggle('active');
+    targetLanguageDropdown.classList.remove('active');
+  });
+  
+  // Hedef dil seçimi butonuna tıklandığında dropdown'ı aç/kapat
+  targetLanguageButton.addEventListener('click', function() {
+    targetLanguageDropdown.classList.toggle('active');
+    languageDropdown.classList.remove('active');
+  });
+  
+  // Dil seçeneklerine tıklandığında
+  languageOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      const selectedLang = this.getAttribute('data-lang');
+      
+      // Cookie'ye kaydet
+      setCookie('source_language', selectedLang, 365); // 1 yıl süreyle sakla
+      
+      // Buton metnini güncelle
+      updateButtonText(languageButton, selectedLang, '<i class="fas fa-microphone"></i>', "Konuşacağınız dil");
+      
+      // Dropdown'ı kapat
+      languageDropdown.classList.remove('active');
+    });
+  });
+  
+  // Hedef dil seçeneklerine tıklandığında
+  targetLanguageOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      const selectedLang = this.getAttribute('data-lang');
+      
+      // Cookie'ye kaydet
+      setCookie('target_language', selectedLang, 365); // 1 yıl süreyle sakla
+      
+      // Buton metnini güncelle
+      updateButtonText(targetLanguageButton, selectedLang, '<i class="fas fa-volume-up"></i>', "Cevap alacağınız dil");
+      
+      // Dropdown'ı kapat
+      targetLanguageDropdown.classList.remove('active');
+    });
+  });
+  
+  // Dropdown dışına tıklandığında kapat
+  document.addEventListener('click', function(event) {
+    if (!event.target.closest('.language-selector')) {
+      languageDropdown.classList.remove('active');
+    }
+    if (!event.target.closest('.target-language-selector')) {
+      targetLanguageDropdown.classList.remove('active');
+    }
+  });
+});
+
+// Buton metnini güncelleme fonksiyonu
+function updateButtonText(button, lang, icon, tooltip) {
+  const languageNames = {
+    'tr': 'Türkçe',
+    'en': 'English',
+    'fr': 'Français',
+    'es': 'Español',
+    'ru': 'Русский'
+  };
+  
+  button.innerHTML = icon + ' ' + (languageNames[lang] || 'Seçiniz');
+  button.title = tooltip;
+}
+
+// Cookie işlemleri için yardımcı fonksiyonlar
+function setCookie(name, value, days) {
+  let expires = "";
+  if (days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function getCookie(name) {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
 }
