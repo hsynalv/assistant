@@ -17,6 +17,8 @@ app = Flask(__name__)
 
 clients = []
 
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -287,8 +289,9 @@ def create_prompt(custom_instruction, input, history, caption, emotion, source_l
     }
     source_name = language_names.get(source_lang, 'Unknown')
     target_name = language_names.get(target_lang, 'Unknown')
-    
-    return f"Translate from {source_name} ({source_lang}) to {target_name} ({target_lang}). Geçmiş konuşmalar: {history} Input: {input}"
+
+    #return f"Translate from {source_name} ({source_lang}) to {target_name} ({target_lang}). Geçmiş konuşmalar: {history} Input: {input}"
+    return f"Translate from {source_name} ({source_lang}) to {target_name} ({target_lang}). Input: {input}"
 
 def run_assistant(ci, audio, ip_address, source_language='tr', target_language='en'):
     try:
