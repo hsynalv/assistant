@@ -134,6 +134,9 @@ function startRecording(e) {
     audioContext.resume();
   }
   
+  // Mikrofon animasyonunu göster (basılı tutma başladığında)
+  showMicAnimation();
+  
   // Mikrofon erişimi iste
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(streamObj => {
@@ -152,14 +155,13 @@ function startRecording(e) {
       
       source.connect(recorderNode);
       recorderNode.connect(audioContext.destination);
-      
-      // Mikrofon animasyonunu göster
-      showMicAnimation();
     })
     .catch(error => {
       console.error('Mikrofon erişimi reddedildi:', error);
       isRecording = false;
       isPressed = false;
+      // Hata durumunda da mikrofon animasyonunu gizle
+      hideMicAnimation();
     });
 }
 
@@ -172,6 +174,9 @@ function stopRecording() {
   
   isPressed = false;
   isRecording = false;
+  
+  // Basılı tutma biter bitmez mikrofon animasyonunu gizle
+  hideMicAnimation();
   
   // Önce sample rate değerini kaydet
   const sampleRate = audioContext ? audioContext.sampleRate : 44100; // Varsayılan değer: 44100
@@ -259,7 +264,6 @@ function cleanupRecording() {
     audioContext = null;
   }
   
-  hideMicAnimation();
   // audioData'yı temizlemeyelim, stopRecording fonksiyonunda kullanıyoruz
   // audioData = [];
 }

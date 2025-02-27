@@ -106,5 +106,57 @@
     {
         "Soru": " Ben seni çok özledim ve çok seviyorum",
         "answer": "I miss you a lot and I love you very much."
+    },
+    {
+        "Soru": " Naber, nasılsın?",
+        "answer": "What's up, how are you?"
+    },
+    {
+        "Soru": " Çalışıyor ondan yavşak",
+        "answer": "Output: \"He's working, that's why he's a jerk.\""
+    },
+    {
+        "Soru": " Merhaba, şu an mesela case team",
+        "answer": "Hello, right now for example the case team"
+    },
+    {
+        "Soru": " .",
+        "answer": "Output: ."
+    },
+    {
+        "Soru": " .",
+        "answer": "Output: ."
+    },
+    {
+        "Soru": " .",
+        "answer": "Output: ."
+    },
+    {
+        "Soru": " .",
+        "answer": "Please provide the Turkish text you would like to have translated into English."
+    },
+    {
+        "Soru": " Altyazı M.K.",
+        "answer": "Subtitle M.K."
+    },
+    {
+        "Soru": " .",
+        "answer": "Output: ."
+    },
+    {
+        "Soru": " .",
+        "answer": "Output: ."
+    },
+    {
+        "Soru": " Prezident",
+        "answer": "President"
+    },
+    {
+        "Soru": " Yasir sana direkt İngilizceye çeviren bot yaptım bak nasıl çalışıyormuş gör bakalım be",
+        "answer": "I made a bot for you that translates directly into English, see how it works."
+    },
+    {
+        "Soru": " CsG o girip istediğin gibi küfür edebilirsin karşındaki Ruslara",
+        "answer": "Ты можешь войти в CsG и ругаться как хочешь с русскими, которые напротив."
     }
 ]
