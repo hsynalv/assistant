@@ -19,6 +19,15 @@ let defaultSafetySettings = [
 // Load safety settings from localStorage or use default
 let safetySettings = JSON.parse(localStorage.getItem('safetySettings')) || defaultSafetySettings;
 
+// Felix'e basılı tutma özelliği için değişkenler
+let pressTimer;
+let isPressed = false;
+let audioContext = null;
+let source = null;
+let recorderNode = null;
+let audioData = [];
+let stream = null;
+
 // Show Microphone Animation
 function showMicAnimation() {
     const micElement = document.createElement("div");
@@ -85,116 +94,174 @@ function handleSubmit(value) {
 
 let isRecording = false; // Kaydın aktif olup olmadığını izleyen bir değişken
 
-function activateFelix() {
+// Felix'e tıklama yerine basılı tutma olaylarını ekleyelim
+document.addEventListener('DOMContentLoaded', function() {
+  const felixElement = document.getElementById('felix');
+  
+  // Basılı tutma başlangıcı
+  felixElement.addEventListener('mousedown', startRecording);
+  felixElement.addEventListener('touchstart', startRecording, { passive: false });
+  
+  // Basılı tutma bitişi
+  document.addEventListener('mouseup', stopRecording);
+  document.addEventListener('touchend', stopRecording);
+  
+  // Sayfa değiştirildiğinde veya kapatıldığında kaydı durdur
+  window.addEventListener('beforeunload', function() {
     if (isRecording) {
-        console.log("Mikrofon zaten açık, işlem yeniden başlatılmıyor.");
-        return; // Eğer zaten kayıt yapılıyorsa yeni bir işlem başlatma
+      cleanupRecording();
     }
-    isRecording = true;
-    const ci = customInstruction; // Geçerli custom_instruction
-    const currentSafetySettings = JSON.parse(localStorage.getItem('safetySettings')) || defaultSafetySettings;
-    const sourceLanguage = getCookie('source_language') || 'tr'; // Kaynak dil bilgisini al
-    const targetLanguage = getCookie('target_language') || 'en'; // Hedef dil bilgisini al
+  });
+});
 
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioContext.createMediaStreamSource(stream);
-            const bufferSize = 4096;
-            const recorderNode = audioContext.createScriptProcessor(bufferSize, 1, 1);
-            let audioData = [];  // Kayıt edilen PCM verilerini tutan dizi
-            let lastVoiceTime = Date.now();
-            let maxRMS = 0; // Kayıt sırasında tespit edilen en yüksek RMS değeri
-            const silenceThreshold = 0.01;  // Sesin RMS değeri için eşik
+// Kayıt başlatma fonksiyonu
+function startRecording(e) {
+  // Dokunmatik ekranlarda sayfanın kaymasını engelle
+  if (e.type === 'touchstart') {
+    e.preventDefault();
+  }
+  
+  if (isRecording) {
+    console.log("Mikrofon zaten açık, işlem yeniden başlatılmıyor.");
+    return;
+  }
+  
+  isPressed = true;
+  isRecording = true;
+  
+  // Eğer audioContext daha önce oluşturulduysa, hala çalışabilir durumda olabilir
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+  
+  // Mikrofon erişimi iste
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(streamObj => {
+      stream = streamObj;
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      source = audioContext.createMediaStreamSource(stream);
+      const bufferSize = 4096;
+      recorderNode = audioContext.createScriptProcessor(bufferSize, 1, 1);
+      audioData = [];  // Kayıt edilen PCM verilerini tutan dizi
+      
+      recorderNode.onaudioprocess = function(e) {
+        const input = e.inputBuffer.getChannelData(0);
+        // Gelen veriyi kopyalayarak kaydet
+        audioData.push(new Float32Array(input));
+      };
+      
+      source.connect(recorderNode);
+      recorderNode.connect(audioContext.destination);
+      
+      // Mikrofon animasyonunu göster
+      showMicAnimation();
+    })
+    .catch(error => {
+      console.error('Mikrofon erişimi reddedildi:', error);
+      isRecording = false;
+      isPressed = false;
+    });
+}
 
-            recorderNode.onaudioprocess = function(e) {
-                const input = e.inputBuffer.getChannelData(0);
-                let sum = 0;
-                for (let i = 0; i < input.length; i++) {
-                    sum += input[i] * input[i];
-                }
-                const rms = Math.sqrt(sum / input.length);
-                if (rms > maxRMS) { maxRMS = rms; }
-                if (rms > silenceThreshold) {
-                    lastVoiceTime = Date.now();
-                }
-                // Gelen veriyi kopyalayarak kaydet
-                audioData.push(new Float32Array(input));
-            };
+// Kayıt durdurma fonksiyonu
+function stopRecording() {
+  if (!isPressed || !isRecording) {
+    console.log("Kayıt durumu: isPressed=", isPressed, "isRecording=", isRecording);
+    return;
+  }
+  
+  isPressed = false;
+  isRecording = false;
+  
+  // Önce sample rate değerini kaydet
+  const sampleRate = audioContext ? audioContext.sampleRate : 44100; // Varsayılan değer: 44100
+  
+  // Kaydı temizle ve durdur 
+  cleanupRecording();
+  
+  // Eğer hiç ses kaydedilmediyse işlemi iptal et
+  if (audioData.length === 0) {
+    console.log("Hiç ses kaydedilmedi, işlem iptal ediliyor.");
+    return;
+  }
+  console.log("Ses kaydı alındı, işleniyor... Parça sayısı:", audioData.length);
+  
+  // Kaydedilen parçaları birleştir
+  const mergedData = mergeBuffers(audioData);
+  console.log("Ses parçaları birleştirildi, uzunluk:", mergedData.length);
+  
+  // PCM verisini WAV dosyasına çevir
+  const wavBlob = encodeWAV(mergedData, sampleRate);
+  console.log("WAV dosyası oluşturuldu, boyut:", wavBlob.size, "bytes");
+  
+  // FormData'ya ekle ve sunucuya gönder
+  const ci = customInstruction;
+  const currentSafetySettings = JSON.parse(localStorage.getItem('safetySettings')) || defaultSafetySettings;
+  const sourceLanguage = getCookie('source_language') || 'tr';
+  const targetLanguage = getCookie('target_language') || 'en';
+  
+  const formData = new FormData();
+  formData.append('audio', wavBlob, 'input.wav');
+  formData.append('custom_instruction', ci);
+  formData.append('safety_settings', JSON.stringify(currentSafetySettings));
+  formData.append('source_language', sourceLanguage);
+  formData.append('target_language', targetLanguage);
+  
+  console.log("Form verisi hazırlandı, sunucuya gönderiliyor...");
+  console.log("Hedef URL:", window.location.origin + '/activate_assistant');
+  
+  fetch(window.location.origin + '/activate_assistant', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    console.log("Sunucudan yanıt alındı, durum:", response.status);
+    if (!response.ok) {
+      throw new Error('Ses dosyası alınamadı.');
+    }
+    return response.blob();
+  })
+  .then(blob => {
+    console.log("Ses yanıtı alındı, boyut:", blob.size, "bytes");
+    const audioUrl = URL.createObjectURL(blob);
+    const audioPlayer = new Audio(audioUrl);
+    showSpeakingAnimation();
+    audioPlayer.onended = () => {
+      hideSpeakingAnimation();
+    };
+    audioPlayer.play();
+  })
+  .catch(error => {
+    console.error('Sunucu isteği hatası:', error.message);
+  });
+}
 
-            source.connect(recorderNode);
-            recorderNode.connect(audioContext.destination); // Bazı tarayıcılarda gerekli
-
-            // Mikrofon animasyonunu göster
-            showMicAnimation();
-
-            // Sessizlik kontrolü: 1.5 saniye sessizlik varsa kaydı durdur
-            function checkSilence() {
-                if (Date.now() - lastVoiceTime > 1500) {
-                    // Eğer kaydedilen maksimum ses seviyesi anlamlı değilse kaydı iptal et
-                    if (maxRMS < 0.05) {
-                        console.log("Anlamlı bir konuşma tespit edilmedi, kayit iptal ediliyor.");
-                        recorderNode.disconnect();
-                        source.disconnect();
-                        stream.getTracks().forEach(track => track.stop());
-                        hideMicAnimation();
-                        isRecording = false;
-                        return;
-                    }
-                    console.log("Konuşma bitti, kaydı durduruluyor.");
-                    recorderNode.disconnect();
-                    source.disconnect();
-                    stream.getTracks().forEach(track => track.stop());
-                    hideMicAnimation();
-                    isRecording = false;
-
-                    // Kaydedilen parçaları birleştir
-                    const mergedData = mergeBuffers(audioData);
-                    // PCM verisini WAV dosyasına çevir
-                    const wavBlob = encodeWAV(mergedData, audioContext.sampleRate);
-
-                    // FormData'ya ekle ve sunucuya gönder
-                    const formData = new FormData();
-                    formData.append('audio', wavBlob, 'input.wav');
-                    formData.append('custom_instruction', ci);
-                    formData.append('safety_settings', JSON.stringify(currentSafetySettings));
-                    formData.append('source_language', sourceLanguage); // Kaynak dil bilgisini ekle
-                    formData.append('target_language', targetLanguage); // Hedef dil bilgisini ekle
-
-                    fetch('/activate_assistant', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Ses dosyası alınamadı.');
-                        }
-                        return response.blob();
-                    })
-                    .then(blob => {
-                        const audioUrl = URL.createObjectURL(blob);
-                        const audioPlayer = new Audio(audioUrl);
-                        showSpeakingAnimation();
-                        audioPlayer.onended = () => {
-                            hideSpeakingAnimation();
-                            activateFelix();
-                        };
-                        audioPlayer.play();
-                    })
-                    .catch(error => {
-                        console.error('Hata:', error);
-                    });
-                } else {
-                    requestAnimationFrame(checkSilence);
-                }
-            }
-            checkSilence();
-        })
-        .catch(error => {
-            console.error('Mikrofon erişimi reddedildi:', error);
-            isRecording = false;
-            setTimeout(() => activateFelix(), 1000);
-        });
+// Kayıt temizleme fonksiyonu
+function cleanupRecording() {
+  if (recorderNode) {
+    recorderNode.disconnect();
+    recorderNode = null;
+  }
+  
+  if (source) {
+    source.disconnect();
+    source = null;
+  }
+  
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+  
+  if (audioContext) {
+    // AudioContext'i kapatmak yerine sadece referansı kaldırıyoruz
+    // çünkü bazı tarayıcılarda kapatmak sorun çıkarabilir
+    audioContext = null;
+  }
+  
+  hideMicAnimation();
+  // audioData'yı temizlemeyelim, stopRecording fonksiyonunda kullanıyoruz
+  // audioData = [];
 }
 
 // Yeni eklenen yardımcı fonksiyonlar:
@@ -525,4 +592,11 @@ function getCookie(name) {
     if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
   }
   return null;
+}
+
+// Geriye dönük uyumluluk için activateFelix fonksiyonu
+function activateFelix() {
+  // Bu fonksiyon artık kullanılmıyor, basılı tutma mantığına geçtik
+  console.log("activateFelix fonksiyonu artık kullanılmıyor. Basılı tutma özelliği aktif.");
+  // Eğer bir yerde çağrılırsa, bir şey yapmasın
 }
