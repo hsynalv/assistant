@@ -55,38 +55,6 @@ function hideSpeakingAnimation() {
     felix.classList.remove("speaking");
 }
 
-function showInputContainer() {
-    const responseFrame = document.getElementById('response-frame');
-    const responseMessage = document.getElementById('response-message');
-
-    // Clear previous content
-    responseMessage.innerHTML = '';
-
-    // Create input container
-    const inputContainer = document.createElement('div');
-    inputContainer.classList.add('input-container');
-
-    // Create input field
-    const inputField = document.createElement('input');
-    inputField.type = 'text';
-    inputField.placeholder = 'Enter your custom instruction here...';
-
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.innerText = 'Submit';
-    submitButton.onclick = () => handleSubmit(inputField.value);
-
-    // Append input field and button to the container
-    inputContainer.appendChild(inputField);
-    inputContainer.appendChild(submitButton);
-
-    // Append the input container to the response message area
-    responseMessage.appendChild(inputContainer);
-
-    // Show the response frame
-    responseFrame.classList.add('active');
-}
-
 function handleSubmit(value) {
     customInstruction = value.trim() || defaultCustomInstruction; // Save the custom instruction or use default if empty
     closeResponse();

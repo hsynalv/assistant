@@ -10,6 +10,9 @@ import pygame
 import requests
 from flask import Flask, render_template, request, jsonify, send_file
 from groq import Groq
+import librosa
+import numpy as np
+import noisereduce as nr
  
 
 app = Flask(__name__)
@@ -197,6 +200,14 @@ def main_speech_recognition_flow(audio, language='tr'):
         print(f"Ses işleme hatası: {str(e)}")
         return None
 
+def remove_noise(audio_content):
+    # Ses dosyasını yükle
+    y, sr = librosa.load(io.BytesIO(audio_content), sr=16000)
+    
+    # Gürültü azaltma işlemi
+    reduced_noise = nr.reduce_noise(y=y, sr=sr)
+    
+    return reduced_noise
 
 def clear_newLine(text):
     text = text.replace("\n", " ")
