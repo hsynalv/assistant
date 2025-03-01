@@ -172,17 +172,41 @@ def recognize_speech(audio_content, sample_rate, language='tr'):
         # Geçici dosya oluştur
         with io.BytesIO(audio_content) as audio_file:
             audio_file.name = "temp.wav"
+            audio_bytes = audio_file.read()
+            print(f"Whisper'a gönderilen ses dosyası boyutu: {len(audio_bytes)} bytes")
             
-            transcription = client_groq.audio.transcriptions.create(
-                file=(audio_file.name, audio_file.read()), # Required audio file
-                model="whisper-large-v3-turbo", # Required model to use for transcription
-                prompt="Specify context or spelling",  # Optional
-                response_format="json",  # Optional
-                language=language,  # Kullanıcının seçtiği dil
-                temperature=0.0  # Optional
-            )
-            print(transcription.text)
-            return transcription.text
+            # Whisper API'ye ses dosyasını gönderme çabasını daha güvenli hale getir
+            try:
+                transcription = client_groq.audio.transcriptions.create(
+                    file=(audio_file.name, audio_bytes), # Required audio file
+                    model="whisper-large-v3-turbo", # Required model to use for transcription
+                    prompt="Specify context or spelling",  # Optional
+                    response_format="json",  # Optional
+                    language=language,  # Kullanıcının seçtiği dil
+                    temperature=0.0  # Optional
+                )
+                print(transcription.text)
+                return transcription.text
+            except Exception as api_error:
+                print(f"Whisper API Hatası: {str(api_error)}")
+                
+                # OpenAI Whisper API'yi alternatif olarak deneyin
+                try:
+                    print("Groq başarısız oldu, OpenAI Whisper API deneniyor...")
+                    audio_file = io.BytesIO(audio_content)
+                    audio_file.name = "audio.wav"
+                    # OpenAI'nin transcription API'si ile deneyin (hesabınızda yapılandırılmışsa)
+                    transcription = openai.audio.transcriptions.create(
+                        file=audio_file,
+                        model="whisper-1",
+                        language=language
+                    )
+                    print(f"OpenAI Whisper sonucu: {transcription.text}")
+                    return transcription.text
+                except Exception as openai_error:
+                    print(f"OpenAI Whisper API Hatası: {str(openai_error)}")
+                    raise # Orijinal hatayı yeniden fırlat
+            
     except Exception as e:
         print(f"STT Hatası: {str(e)}")
         return None
@@ -310,8 +334,9 @@ def create_prompt(custom_instruction, input, history, caption, emotion, source_l
 def run_assistant(ci, audio, ip_address, source_language='tr', target_language='en'):
     try:
         # Gelen WAV dosyasını işleyerek metne dönüştür
-        clean_audio = remove_noise(audio)
-        Soru = main_speech_recognition_flow(clean_audio, source_language)
+        # Gürültü temizleme işlemini devre dışı bırak, doğrudan ham ses verisini kullan
+        print(f"Alınan ses dosyası boyutu: {len(audio)} bytes")
+        Soru = main_speech_recognition_flow(audio, source_language)
         if Soru:
             print(f"Tanınan metin: {Soru}")
         else:
