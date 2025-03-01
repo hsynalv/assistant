@@ -17,6 +17,7 @@ import noisereduce as nr
 
 app = Flask(__name__)
 
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # Maksimum 64MB dosya kabul et
 
 
 
@@ -309,7 +310,8 @@ def create_prompt(custom_instruction, input, history, caption, emotion, source_l
 def run_assistant(ci, audio, ip_address, source_language='tr', target_language='en'):
     try:
         # Gelen WAV dosyasını işleyerek metne dönüştür
-        Soru = main_speech_recognition_flow(audio, source_language)
+        clean_audio = remove_noise(audio)
+        Soru = main_speech_recognition_flow(clean_audio, source_language)
         if Soru:
             print(f"Tanınan metin: {Soru}")
         else:
