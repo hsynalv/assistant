@@ -106,7 +106,14 @@ function startRecording(e) {
   showMicAnimation();
   
   // Mikrofon erişimi iste
-  navigator.mediaDevices.getUserMedia({ audio: true })
+  navigator.mediaDevices.getUserMedia({ 
+    audio: {
+      echoCancellation: true, // Yankıyı azaltmak için
+      noiseCancellation: true, // Gürültüyü azaltmak için
+      autoGainControl: true, // Ses seviyesini otomatik olarak ayarlamak için
+      sampleRate: 16000 // 16000 Hz'lik ses örnek oranı
+    } 
+  })
     .then(streamObj => {
       stream = streamObj;
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
